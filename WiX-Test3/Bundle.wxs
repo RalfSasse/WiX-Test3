@@ -6,8 +6,10 @@
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
   
+  <!-- Installation erfordert Windows 7, Windows 8, Windows 10, Windows Server 2016 oder Windows Server 2019 -->
+  
 	<Bundle Name="WiX_Test3" 
-          Condition="VersionNT = v6.1"
+          Condition="VersionNT = 601 OR VersionNT = 602 OR VersionNT = 603"
           Version="1.0.0.0" 
 					Manufacturer="RalfSasse" 
 					UpgradeCode="F2DA6640-395C-45B8-91CC-BEC2244640B9">
