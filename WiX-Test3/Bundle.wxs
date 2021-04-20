@@ -6,13 +6,12 @@
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
      xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
   
-  <!-- Installation erfordert Windows 7, Windows 8, Windows 10, Windows Server 2016 oder Windows Server 2019 -->
+<!-- vorübergehend entfernt: Condition="VersionNT = 601 OR VersionNT = 602 OR VersionNT = 603" -->
   
 	<Bundle Name="WiX_Test3" 
-          Condition="VersionNT = 601 OR VersionNT = 602 OR VersionNT = 603"
           Version="1.0.0.0" 
 					Manufacturer="RalfSasse" 
-					UpgradeCode="F2DA6640-395C-45B8-91CC-BEC2244640B9">
+					UpgradeCode="3DADF418-A9F6-4331-BD9E-D88764881FED">
     
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
 
@@ -27,6 +26,13 @@
                          Variable="Net4x64FullVersion" 
                          Win64="yes" />
 
+    <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
+
+    <util:DirectorySearch Id="NetCoreInstalled" 
+                          Variable="NetCoreInstalled"
+                          Path="[ProgramFilesFolder]dotnet\shared\Microsoft.WindowsDesktop.App\3.1.14"
+                          Result="exists" />
+
     <Chain>
 
       <ExePackage Id="Net48" 
@@ -39,7 +45,21 @@
                   InstallCommand="/q"
                   SourceFile="ndp48-x86-x64-allos-enu.exe"
                   DetectCondition="Net4FullVersion AND (NOT VersionNT64 OR Net4x64FullVersion)"
-                  InstallCondition="(VersionNT &lt; v6.0 OR VersionNT64 &lt; v6.0) AND (NOT (Net4FullVersion OR Net4x64FullVersion))" />
+                  InstallCondition="(VersionNT &lt; 600 OR VersionNT64 &lt; 600) AND (NOT (Net4FullVersion OR Net4x64FullVersion))" />
+
+      <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
+
+      <ExePackage Id="NetCore3114x86"
+                  Name="windowsdesktop-runtime-3.1.14-win-x86.exe"
+                  Cache="no"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
+                  Vital="yes"
+                  InstallCommand="/quiet /passive"
+                  SourceFile="windowsdesktop-runtime-3.1.14-win-x86.exe"
+                  DetectCondition="NetCoreInstalled"
+                  InstallCondition="(VersionNT64) AND (NOT NetCoreInstalled)" />
 
       <RollbackBoundary />
 
