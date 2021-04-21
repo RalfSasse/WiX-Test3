@@ -28,11 +28,20 @@
 
     <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
 
+    <!-- 
+    
+    <util:RegistrySearch Root="HKLM" 
+                         Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" 
+                         Value="Version" 
+                         Variable="NetCoreInstalled" />
+    
+    -->
+   
     <util:DirectorySearch Id="NetCoreInstalled" 
                           Variable="NetCoreInstalled"
                           Path="[ProgramFilesFolder]dotnet\shared\Microsoft.WindowsDesktop.App\3.1.14"
                           Result="exists" />
-
+        
     <Chain>
 
       <ExePackage Id="Net48" 
@@ -49,18 +58,20 @@
 
       <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
 
-      <ExePackage Id="NetCore3114x86"
-                  Name="windowsdesktop-runtime-3.1.14-win-x86.exe"
+      <ExePackage Id="NetCore3114x64"
+                  Name="windowsdesktop-runtime-3.1.14-win-x64.exe"
                   Cache="no"
                   Compressed="yes"
                   PerMachine="yes"
                   Permanent="yes"
                   Vital="yes"
                   InstallCommand="/quiet /passive"
-                  SourceFile="windowsdesktop-runtime-3.1.14-win-x86.exe"
+                  SourceFile="windowsdesktop-runtime-3.1.14-win-x64.exe"
                   DetectCondition="NetCoreInstalled"
-                  InstallCondition="(VersionNT64) AND (NOT NetCoreInstalled)" />
+                  InstallCondition="(NOT NetCoreInstalled)" />
 
+      <!--        InstallCondition="(VersionNT64) AND (NOT NetCoreInstalled)" />   -->
+      
       <RollbackBoundary />
 
       <MsiPackage Id="WiX_Test2" 
