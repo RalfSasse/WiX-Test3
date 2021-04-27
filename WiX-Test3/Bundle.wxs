@@ -4,46 +4,39 @@
   
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
-     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+     xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+     xmlns:netfx="http://schemas.microsoft.com/wix/NetFxExtension">
+
+  <!-- vorübergehend entfernt: Condition="VersionNT = 601 OR VersionNT = 602 OR VersionNT = 603" -->
   
-<!-- vorübergehend entfernt: Condition="VersionNT = 601 OR VersionNT = 602 OR VersionNT = 603" -->
-  
-	<Bundle Name="WiX_Test3" 
-          Version="1.0.0.0" 
-					Manufacturer="RalfSasse" 
-					UpgradeCode="3DADF418-A9F6-4331-BD9E-D88764881FED">
+	<Bundle Name="WiX_Test3"
+          Version="1.0.0.0"
+          Manufacturer="RalfSasse"
+          UpgradeCode="3DADF418-A9F6-4331-BD9E-D88764881FED">
     
     <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
 
     <util:RegistrySearch Root="HKLM" 
                          Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" 
                          Value="Version" 
-                         Variable="Net4FullVersion" />
-    
-    <util:RegistrySearch Root="HKLM" 
-                         Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" 
-                         Value="Version" 
-                         Variable="Net4x64FullVersion" 
-                         Win64="yes" />
+                         Variable="NetFramework48Installed" />
 
     <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
 
-    <!-- 
-    
-    <util:RegistrySearch Root="HKLM" 
-                         Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" 
-                         Value="Version" 
-                         Variable="NetCoreInstalled" />
-    
-    -->
-   
-    <util:DirectorySearch Id="NetCoreInstalled" 
-                          Variable="NetCoreInstalled"
+    <util:DirectorySearch Id="NetCorex86Installed" 
+                          Variable="NetCorex86Installed"
                           Path="[ProgramFilesFolder]dotnet\shared\Microsoft.WindowsDesktop.App\3.1.14"
                           Result="exists" />
-        
+    
+    <util:DirectorySearch Id="NetCorex64Installed" 
+                          Variable="NetCorex64Installed"
+                          Path="[ProgramFiles64Folder]dotnet\shared\Microsoft.WindowsDesktop.App\3.1.14"
+                          Result="exists" />
+       
     <Chain>
 
+      <!-- Installation von .NET Framework 4.8 (falls noch nicht vorhanden). Installationsdatei enthält 32- und 64-Bit-Version -->      
+      
       <ExePackage Id="Net48" 
                   Name="Microsoft .NET Framework 4.8 Setup" 
                   Cache="no" 
@@ -53,10 +46,26 @@
                   Vital="yes" 
                   InstallCommand="/q"
                   SourceFile="ndp48-x86-x64-allos-enu.exe"
-                  DetectCondition="Net4FullVersion AND (NOT VersionNT64 OR Net4x64FullVersion)"
-                  InstallCondition="(VersionNT &lt; 600 OR VersionNT64 &lt; 600) AND (NOT (Net4FullVersion OR Net4x64FullVersion))" />
+                  DetectCondition="NetFramework48Installed"
+                  InstallCondition="(VersionNT &lt; 600) AND (NetFramework48Installed &lt; 528040)" />
 
       <!-- Diese Anweisung basiert auf https://stackoverflow.com/questions/59365880/how-to-detect-net-core-3-1-windows-desktop-app-runtime-is-installed -->
+
+      <!-- Installation der 32-Bit-Version von .NET Core 3.1.14 (falls noch nicht vorhanden), wenn der Zielrechner mit einem 32-Bit-Windows läuft -->      
+
+      <ExePackage Id="NetCore3114x86"
+                  Name="windowsdesktop-runtime-3.1.14-win-x86.exe"
+                  Cache="no"
+                  Compressed="yes"
+                  PerMachine="yes"
+                  Permanent="yes"
+                  Vital="yes"
+                  InstallCommand="/quiet /passive"
+                  SourceFile="windowsdesktop-runtime-3.1.14-win-x86.exe"
+                  DetectCondition="NetCorex86Installed"
+                  InstallCondition="(NOT VersionNT64) AND (NOT NetCorex86Installed)" />
+
+      <!-- Installation der 64-Bit-Version von .NET Core 3.1.14, (falls noch nicht vorhanden), wenn der Zielrechner mit einem 64-Bit-Windows läuft -->      
 
       <ExePackage Id="NetCore3114x64"
                   Name="windowsdesktop-runtime-3.1.14-win-x64.exe"
@@ -67,8 +76,8 @@
                   Vital="yes"
                   InstallCommand="/quiet /passive"
                   SourceFile="windowsdesktop-runtime-3.1.14-win-x64.exe"
-                  DetectCondition="NetCoreInstalled"
-                  InstallCondition="(NOT NetCoreInstalled)" />
+                  DetectCondition="NetCorex64Installed"
+                  InstallCondition="(VersionNT64) AND (NOT NetCorex64Installed)" />
 
       <!--        InstallCondition="(VersionNT64) AND (NOT NetCoreInstalled)" />   -->
       
