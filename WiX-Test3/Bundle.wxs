@@ -13,8 +13,14 @@
           Version="1.0.0.0"
           Manufacturer="RalfSasse"
           UpgradeCode="3DADF418-A9F6-4331-BD9E-D88764881FED">
+
+    <!-- Einfügen einer eigenen EULA (als RTF-Dokument) und eines eigenen Logos (als PNG-Datei) -->
     
-    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense">
+      <bal:WixStandardBootstrapperApplication LicenseFile="customEula.rtf"
+                                              LogoFile="elementsystems_logo.png" />
+    </BootstrapperApplicationRef>
+    
 
     <util:RegistrySearch Root="HKLM" 
                          Key="SOFTWARE\Microsoft\Net Framework Setup\NDP\v4\Full" 
